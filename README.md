@@ -1,11 +1,54 @@
-# YouTube Plus (ex. YTLite)
-A flexible enhancer for YouTube on iOS, featuring over hundred customizable options.
+# YouTube Plus (YTweaks Fork)
+A flexible enhancer for YouTube on iOS, featuring over hundred customizable options. 
+
+This fork adds more tweak options when building with GitHub actions. No changes are made to the YouTube Plus .deb itself, just the tweaks that get packaged with it. 
+
+Added tweaks:
+- [YTABConfig](https://github.com/PoomSmart/YTABConfig)
+- [YTIcons](https://github.com/PoomSmart/YTIcons)
+- [YTweaks](https://github.com/fosterbarnes/YTweaks)
+- [YouGroupSettings](https://github.com/fosterbarnes/YouGroupSettings)
+
+Original repo: https://github.com/dayanch96/YTLite
+
+## How to build a YTPlusTweaked using Github actions
+> [!NOTE]
+> If this your first time, complete following steps before starting:
+>
+> 1. Fork this repository using the fork button on the top right
+> 2. On your forked repository, go to **Repository Settings** > **Actions**, enable **Read and Write** permissions.
+
+<details>
+  <summary>How to build YTPlusTweaked app</summary>
+  <ol>
+    <li>Click on <strong>Sync fork</strong>, and if your branch is out-of-date, click on <strong>Update branch</strong>.</li>
+    <li>Navigate to the <strong>Actions tab</strong> in your forked repository and select <strong>Create YouTube Plus app</strong>.</li>
+    <li>Click the <strong>Run workflow</strong> button located on the right side.</li>
+    <li>Mark or unmark the tweaks you want to integrate. Learn more about them in the <a href="#tweak-integration-details">Tweak Integration Details</a> section.</li>
+    <li>Prepare a decrypted .ipa file <em>(we cannot provide this due to legal reasons)</em>, then upload it to a file provider (e.g., https://litterbox.catbox.moe, or Dropbox is recommended). Paste the URL of the decrypted IPA file in the provided field.</li>
+    <li><strong>NOTE:</strong> Make sure to provide a direct download link to the file, not a link to a webpage. Otherwise, the process will fail.</li>
+    <li>Enter the tweak version from the releases (the latest release is selected by default). You can also change the BundleID and Display Name if desired.</li>
+    <li>Make sure all inputs are correct, then click <strong>Run workflow</strong> to start the process.</li>
+    <li>Wait for the build to finish. You can download the YouTube Plus app from the releases section of your forked repo. (If you can't find the releases section, go to your forked repo and add /releases to the URL, i.e., github.com/user/YTLite/releases.)</li>
+  </ol>
+</details>
+
+<details>
+  <summary>How to build .debs</summary>
+  <ol>
+    <li>Fork this repo</li>
+    <li>Go to the "Actions" tab of your new repo</li>
+    <li>Select "Build .deb packages"</li>
+    <li>Select tweaks</li>
+    <li>Click "Run workflow"</li>
+    <td><img src="Resources/scr10.jpg" alt="Screenshot 10" /></td>
+  </ol>
+</details>
 
 ## Table of Contents
 - [Screenshots](#screenshots)
 - [Main Features](#main-features)
 - [FAQ](#faq)
-- [Reviews](#reviews)
 - [How to build a YouTube Plus app using GitHub Actions](#how-to-build-a-youtube-plus-app-using-github-actions)
 - [Supported YouTube Version](#supported-youtube-version)
 - [Tweak Integration Details](#tweak-integration-details)
@@ -13,9 +56,9 @@ A flexible enhancer for YouTube on iOS, featuring over hundred customizable opti
 ## Screenshots
 <table>
    <tr>
-      <td><img src="Resources/scr1.jpg" alt="Screenshot 1" /></td>
-      <td><img src="Resources/scr2.jpg" alt="Screenshot 2" /></td>
-      <td><img src="Resources/scr3.jpg" alt="Screenshot 3" /></td>
+      <td><img src="Resources/scr11.jpg" alt="Screenshot 1" /></td>
+      <td><img src="Resources/scr13.jpg" alt="Screenshot 2" /></td>
+      <td><img src="Resources/scr14.jpg" alt="Screenshot 3" /></td>
    </tr>
 </table>
 
@@ -57,54 +100,10 @@ A flexible enhancer for YouTube on iOS, featuring over hundred customizable opti
 - [🇮🇹 FAQ in Italiano](FAQs/FAQ_IT.md)
 - [🇵🇱 FAQ po polsku](FAQs/FAQ_PL.md)
 
-## Reviews
-Review by [@qbap](https://github.com/qbap) on ONE Jailbreak: https://onejailbreak.com/blog/youtube-plus/
-
-## How to build a YouTube Plus app using Github actions
-> [!NOTE]
-> If this your first time, complete following steps before starting:
->
-> 1. Fork this repository using the fork button on the top right
-> 2. On your forked repository, go to **Repository Settings** > **Actions**, enable **Read and Write** permissions.
-
-<details>
-  <summary>How to build the YouTube Plus app</summary>
-  <ol>
-    <li>Click on <strong>Sync fork</strong>, and if your branch is out-of-date, click on <strong>Update branch</strong>.</li>
-    <li>Navigate to the <strong>Actions tab</strong> in your forked repository and select <strong>Create YouTube Plus app</strong>.</li>
-    <li>Click the <strong>Run workflow</strong> button located on the right side.</li>
-    <li>Mark or unmark the tweaks you want to integrate. Learn more about them in the <a href="#tweak-integration-details">Tweak Integration Details</a> section.</li>
-    <li>Prepare a decrypted .ipa file <em>(we cannot provide this due to legal reasons)</em>, then upload it to a file provider (e.g., filebin.net, filemail.com, or Dropbox is recommended). Paste the URL of the decrypted IPA file in the provided field.</li>
-    <li><strong>NOTE:</strong> Make sure to provide a direct download link to the file, not a link to a webpage. Otherwise, the process will fail.</li>
-    <li>Enter the tweak version from the releases (the latest release is selected by default). You can also change the BundleID and Display Name if desired.</li>
-    <li>Make sure all inputs are correct, then click <strong>Run workflow</strong> to start the process.</li>
-    <li>Wait for the build to finish. You can download the YouTube Plus app from the releases section of your forked repo. (If you can't find the releases section, go to your forked repo and add /releases to the URL, i.e., github.com/user/YTLite/releases.)</li>
-  </ol>
-</details>
-
-
-<details>
-  <summary>How to build the YouTube Plus app with your own link for the YouTube Plus tweak</summary>
-  <ol>
-    <blockquote>
-      <p><strong>NOTE:</strong> This option is primarily intended for building the YouTube Plus app based on the beta file you have. In other cases, it is generally not needed.</p>
-    </blockquote>
-    <li>Click on <strong>Sync fork</strong>, and if your branch is out-of-date, click on <strong>Update branch</strong>.</li>
-    <li>Navigate to the <strong>Actions tab</strong> in your forked repository and select <strong>[BETA] Build YouTube Plus app</strong>.</li>
-    <li>Click the <strong>Run workflow</strong> button located on the right side.</li>
-    <li>Mark or unmark the tweaks you want to integrate. Learn more about them in the <a href="#tweak-integration-details">Tweak Integration Details</a> section.</li>
-    <li>Prepare a decrypted .ipa file <em>(we cannot provide this due to legal reasons)</em>, then upload it to a file provider (e.g., filebin.net, filemail.com, or Dropbox is recommended). Paste the URL of the decrypted IPA file in the provided field.</li>
-    <li>Upload your beta tweak file to a file provider and paste direct link to the <strong>URL to the YouTube Plus tweak file</strong> field. You can also change the BundleID and Display Name if desired.</li>
-    <li><strong>NOTE:</strong> Make sure to provide a direct download link to the file, not a link to a webpage. Otherwise, the process will fail.</li>
-    <li>Make sure all inputs are correct, then click <strong>Run workflow</strong> to start the process.</li>
-    <li>Wait for the build to finish. You can download the YouTube Plus app from the releases section of your forked repo. (If you can't find the releases section, go to your forked repo and add /releases to the URL, i.e., github.com/user/YTLite/releases.)</li>
-  </ol>
-</details>
-
 ## Supported YouTube Version
 <ul>
-   <li><strong>Latest confirmed:</strong> <em>20.42.3</em></li>
-   <li><strong>Date tested:</strong> <em>Nov 5, 2025</em></li>
+   <li><strong>Latest confirmed:</strong> <em>20.50.6</em></li>
+   <li><strong>Date tested:</strong> <em>Dec 18, 2025</em></li>
    <li><strong>YouTube Plus:</strong> <em>5.2 beta 4</em></li>
 </ul>
 
@@ -143,3 +142,31 @@ Review by [@qbap](https://github.com/qbap) on ONE Jailbreak: https://onejailbrea
   <p><strong>DontEatMyContent preferences</strong> are available in the <strong>YouTube settings</strong>.</p>
   <p>Source code and additional information are available <a href="https://github.com/therealFoxster/DontEatMyContent">in therealFoxster's GitHub repository</a>.</p>
 </details>
+
+<details>
+  <summary>YTABConfig</summary>
+  <p>YTABConfig is a tweak developed by <a href="https://github.com/PoomSmart">PoomSmart</a> that configures A/B settings in the iOS YouTube app.</p>
+  <p><strong>YTABConfig preferences</strong> are available in the <strong>YouTube settings</strong>.</p>
+  <p>Source code and additional information are available <a href="https://github.com/PoomSmart/YTABConfig">in PoomSmart's GitHub repository</a>.</p>
+</details>
+
+<details>
+  <summary>YTIcons</summary>
+  <p>YTIcons is a tweak developed by <a href="https://github.com/PoomSmart">PoomSmart</a> that displays all usable icons in the iOS YouTube app.</p>
+  <p><strong>YTIcons</strong> are available in the <strong>YouTube settings</strong>.</p>
+  <p>Source code and additional information are available <a href="https://github.com/PoomSmart/YTIcons">in PoomSmart's GitHub repository</a>.</p>
+</details>
+
+<details>
+  <summary>YTweaks</summary>
+  <p>YTweaks is a tweak developed by <a href="https://github.com/fosterbarnes">fosterbarnes</a> that adds a few extra settings like "Fullscreen to Right" and "Fullscreen to Left"</p>
+  <p><strong>YTweaks</strong> preferences are available in the <strong>YouTube settings</strong>.</p>
+  <p>Source code and additional information are available <a href="https://github.com/fosterbarnes/YTweaks">in fosterbarnes's GitHub repository</a>.</p>
+</details>
+
+<details>
+  <summary>YouGroupSettings</summary>
+  <p>YouGroupSettings is a tweak developed by <a href="https://github.com/PoomSmart">PoomSmart</a> that allows custom settings (made by tweaks) to be displayed when the grouped settings experiment is active. Forked by <a href="https://github.com/FosterBarnes">FosterBarnes</a> to support YTweaks</p>
+  <p>Source code and additional information are available <a href="https://github.com/fosterbarnes/YouGroupSettings">in fosterbarnes's GitHub repository</a>.</p>
+</details>
+

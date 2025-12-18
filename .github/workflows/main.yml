@@ -1,4 +1,4 @@
-name: Create YouTube Plus app
+name: Build YTPlusTweaked
 
 on:
   workflow_dispatch:

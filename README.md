@@ -1,12 +1,17 @@
 # YouTube Plus (YTweaks Fork)
 [YouYube Plus](https://github.com/dayanch96/YTLite) with added plugins.
 
-This fork focuses on adding more tweak options when building with GitHub actions, specificially [YTweaks](https://github.com/fosterbarnes/YTweaks) No changes are made to the YouTube Plus .deb itself, just the tweaks that get packaged with it. 
+This repo focuses on simplifying the build process of YouTube Plus, and adding more optional tweaks to bundle with it (specificially [YTweaks](https://github.com/fosterbarnes/YTweaks)). No changes have been made to the YouTube Plus .deb itself, just the tweaks that get packaged with it. 
+
+When building the app, the latest stable YouTube Plus .deb is downloaded from the original repo, then other tweaks are built from source. All tweaks are then injected into your IPA.
 
 YTweaks added settings:
 - **Fullscreen to the right or left:** Locks fullscreen orientation.
 - **Disable floating miniplayer:** Restores the old miniplayer by disabling the floating miniplayer.
 - **Virtual fullscreen bezels:** Adds invisible touch-safe zones on black bars to prevent accidental taps and skips.
+
+Experimental planned features
+- **Hide AI Summaries** Hides AI summaries that appear in the feed.
 
 
 Added tweaks:
@@ -14,10 +19,16 @@ Added tweaks:
 - [YTABConfig](https://github.com/PoomSmart/YTABConfig)
 - [YTIcons](https://github.com/PoomSmart/YTIcons)
 - [YouGroupSettings](https://github.com/fosterbarnes/YouGroupSettings)
+- [Gonerino](https://github.com/castdrian/Gonerino)
 
 Original repo: https://github.com/dayanch96/YTLite
 
-## How to build a YTPlusYTweaks using Github actions
+## How to build a YTPlusYTweaks app
+If you just need to build the YouTube app without much fuss, use GitHub actions. Actions are easy to set up, but slow to run.
+
+If you plan on testing, adding other tweaks, making changes, or building very frequently, build locally. Building locally on your computer takes a bit of setup initially, but is much quicker than actions after setup.
+
+### GitHub Actions
 > [!NOTE]
 > If this your first time, complete following steps before starting:
 >
@@ -53,6 +64,109 @@ Original repo: https://github.com/dayanch96/YTLite
     <li>Wait for the build to finish. You can download the YouTube Plus app from the releases section of your forked repo. (If you can't find the releases section, go to your forked repo and add /releases to the URL, i.e., github.com/user/YTPlusYTweaks/releases.)</li>
   </ol>
 </details>
+
+### Local (Tested on macOS 15 Sequoia)
+<details>
+  <summary>How to build locally on your machine</summary>
+
+1. Install brew and git if not already present, then clone this repo to download the required build scripts:
+
+```bash
+if ! command -v brew &> /dev/null; then
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+else
+    echo "Homebrew already installed."
+fi
+
+brew install git
+cd "$HOME/Desktop"
+git clone --filter=blob:none --no-checkout https://github.com/fosterbarnes/YTPlusYTweaks
+cd YTPlusYTweaks || exit
+git sparse-checkout init --no-cone
+git sparse-checkout set \
+    'deb/*' \
+    'ipa/*' \
+    'build.sh' \
+    'build_dependencies.sh' \
+    'README.md'
+git checkout main
+```
+2. Run the build dependencies script
+
+```bash
+./build_dependencies.sh
+```
+3. Run the build script to build your app
+
+Build with a URL to a decrypted IPA
+```bash
+./build.sh --ipa URL_HERE
+```
+
+Build with the IPA in 'YTPlusYTweaks/ipa'
+```bash
+./build.sh --ipa
+```
+
+Build with any pre-built DEBs in 'YTPlusYTweaks/deb'
+```bash
+./build.sh --ipa --deb
+```
+To list all options:
+```bash
+./build.sh -h
+```
+```bash
+YTPlusYTweaks Build Script
+
+Usage: $0 --ipa [URL] [options]
+
+IPAs Source:
+    --ipa [URL]                  If URL provided: download IPA from URL (saves to ipa/)
+                                  If no URL: use local IPA from ipa/ folder (looks for *.ipa files)
+
+Optional Arguments:
+    --deb                        Use pre-built .deb files from deb/ folder. Otherwise, build from source.
+    --tweak-version <version>    Version of YTLite tweak (default: 5.2b4)
+    --display-name <name>        App display name (default: YouTube)
+    --bundle-id <id>             Bundle ID (default: com.google.ios.youtube)
+
+Tweak Integration Flags:
+    --enable-all                 Enable all tweaks
+    --disable-all                Disable all tweaks
+    
+    --enable-youpip              YouPiP (default: true)
+    --enable-ytuhd               YTUHD (default: true)
+    --enable-yq                  YouQuality (default: true)
+    --enable-ryd                 Return YouTube Dislikes (default: true)
+    --enable-demc                DontEatMyContent (default: true)
+    --enable-ytabconfig          YTABConfig (default: true)
+    --enable-ytweaks             YTweaks (default: true)
+    --enable-yougroupsettings    Settings (default: true)
+    --enable-yticons             YTIcons (default: false)
+    --enable-gonerino            Gonerino (default: false)
+
+    --disable-youpip             YouPiP
+    --disable-ytuhd              YTUHD
+    --disable-yq                 YouQuality
+    --disable-ryd                Return YouTube Dislikes
+    --disable-demc               DontEatMyContent
+    --disable-ytabconfig         YTABConfig
+    --disable-ytweaks            YTweaks
+    --disable-yougroupsettings   YouGroupSettings
+    --disable-yticons            YTIcons
+    --disable-gonerino           Gonerino
+
+Other Options:
+    -h, --help                   Show this help message
+
+Examples:
+    $0 --ipa https://example.com/youtube.ipa
+    $0 --ipa --deb --disable-all
+    $0 --ipa --disable-yticons --enable-ytweaks
+```
+</details>
+
 
 ## Table of Contents
 - [Screenshots](#screenshots)
@@ -179,3 +293,8 @@ Original repo: https://github.com/dayanch96/YTLite
   <p>Source code and additional information are available <a href="https://github.com/fosterbarnes/YouGroupSettings">in fosterbarnes's GitHub repository</a>.</p>
 </details>
 
+<details>
+  <summary>Gonerino</summary>
+  <p>Gonerino is a tweak developed by <a href="https://github.com/castdrian">castdrian</a> that lets you block certain content from your home feed.</p>
+  <p>Source code and additional information are available <a href="https://github.com/castdrian/Gonerino">in castdrian's GitHub repository</a>.</p>
+</details>

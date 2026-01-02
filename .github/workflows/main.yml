@@ -493,83 +493,103 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Extract version from IPA URL (e.g., YouTube_20.50.9.ipa)
-          VERSION=$(echo "${{ inputs.ipa_url }}" | grep -oP 'YouTube_\K[0-9]+\.[0-9]+\.[0-9]+' || echo "unknown")
+          VERSION=$(echo "${{ inputs.ipa_url }}" | grep -oP 'YouTube_\K[0-9]+\.[0-9]+\.[0-9]+' || echo "")
           
-          if [ "$VERSION" = "unknown" ]; then
-            echo "::warning::Could not extract version from IPA URL, using timestamp"
-            VERSION=$(date +%Y%m%d_%H%M%S)
+          if [ -z "$VERSION" ]; then
+            echo "::error::Could not extract version from IPA URL: ${{ inputs.ipa_url }}"
+            exit 1
           fi
+          
+          echo "Extracted version: $VERSION"
           
           TAG="processed-v${VERSION}"
           FILENAME="YouTube_${VERSION}_processed.ipa"
           
           # Rename the built IPA to our desired filename
-          mv YTPlusYTweaks_${{ steps.ytlite_version.outputs.version }}.ipa "$FILENAME"
+          if [ -f "YTPlusYTweaks_${{ steps.ytlite_version.outputs.version }}.ipa" ]; then
+            mv "YTPlusYTweaks_${{ steps.ytlite_version.outputs.version }}.ipa" "$FILENAME"
+            echo "Renamed IPA to: $FILENAME"
+          else
+            echo "::error::Could not find built IPA file"
+            ls -la *.ipa || true
+            exit 1
+          fi
           
-          echo "Uploading $FILENAME to release $TAG"
+          echo "Creating/updating release: $TAG"
           
           # Check if release exists
           RELEASE_EXISTS=$(curl -s -o /dev/null -w "%{http_code}" \
             -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
             "https://api.github.com/repos/${{ github.repository }}/releases/tags/$TAG")
           
           if [ "$RELEASE_EXISTS" = "404" ]; then
             echo "Creating new release: $TAG"
-            curl -X POST \
+            CREATE_RESPONSE=$(curl -X POST \
               -H "Authorization: token $GITHUB_TOKEN" \
               -H "Accept: application/vnd.github.v3+json" \
               "https://api.github.com/repos/${{ github.repository }}/releases" \
-              -d "{\"tag_name\":\"$TAG\",\"name\":\"YouTube Processed v${VERSION}\",\"body\":\"Processed YouTube IPA v${VERSION} with YTLite ${{ steps.ytlite_version.outputs.version }}\",\"draft\":false,\"prerelease\":false}"
+              -d "{\"tag_name\":\"$TAG\",\"name\":\"YouTube Processed v${VERSION}\",\"body\":\"Processed YouTube IPA v${VERSION} with YTLite ${{ steps.ytlite_version.outputs.version }}\\n\\nTweaks included:\\n- YouPiP: ${{ inputs.enable_youpip }}\\n- YTUHD: ${{ inputs.enable_ytuhd }}\\n- YTABConfig: ${{ inputs.enable_ytabconfig }}\\n- YouGroupSettings: ${{ inputs.enable_yougroupsettings }}\",\"draft\":false,\"prerelease\":false}")
             
-            sleep 2
+            echo "Create response: $CREATE_RESPONSE"
+            sleep 3
           else
             echo "Release $TAG already exists"
           fi
           
           # Get release ID
-          RELEASE_ID=$(curl -s \
+          RELEASE_DATA=$(curl -s \
             -H "Authorization: token $GITHUB_TOKEN" \
-            "https://api.github.com/repos/${{ github.repository }}/releases/tags/$TAG" | \
-            jq -r '.id')
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/${{ github.repository }}/releases/tags/$TAG")
+          
+          RELEASE_ID=$(echo "$RELEASE_DATA" | jq -r '.id')
           
           if [ -z "$RELEASE_ID" ] || [ "$RELEASE_ID" = "null" ]; then
             echo "::error::Failed to get release ID"
+            echo "Release data: $RELEASE_DATA"
             exit 1
           fi
           
           echo "Release ID: $RELEASE_ID"
           
           # Delete existing asset with same name if it exists
-          ASSET_ID=$(curl -s \
+          ASSETS=$(curl -s \
             -H "Authorization: token $GITHUB_TOKEN" \
-            "https://api.github.com/repos/${{ github.repository }}/releases/$RELEASE_ID/assets" | \
-            jq -r ".[] | select(.name==\"$FILENAME\") | .id")
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/${{ github.repository }}/releases/$RELEASE_ID/assets")
+          
+          ASSET_ID=$(echo "$ASSETS" | jq -r ".[] | select(.name==\"$FILENAME\") | .id")
           
           if [ -n "$ASSET_ID" ] && [ "$ASSET_ID" != "null" ]; then
             echo "Deleting old asset (ID: $ASSET_ID)"
             curl -X DELETE \
               -H "Authorization: token $GITHUB_TOKEN" \
               "https://api.github.com/repos/${{ github.repository }}/releases/assets/$ASSET_ID"
-            sleep 1
+            sleep 2
           fi
           
           # Upload the new asset
-          echo "Uploading asset..."
+          echo "Uploading $FILENAME ($(du -h "$FILENAME" | cut -f1))..."
+          
+          UPLOAD_URL="https://uploads.github.com/repos/${{ github.repository }}/releases/$RELEASE_ID/assets?name=$FILENAME"
+          
           UPLOAD_RESPONSE=$(curl -X POST \
             -H "Authorization: token $GITHUB_TOKEN" \
             -H "Content-Type: application/octet-stream" \
             --data-binary @"$FILENAME" \
-            "https://uploads.github.com/repos/${{ github.repository }}/releases/$RELEASE_ID/assets?name=$FILENAME")
+            --max-time 3600 \
+            "$UPLOAD_URL")
           
           DOWNLOAD_URL=$(echo "$UPLOAD_RESPONSE" | jq -r '.browser_download_url')
           
           if [ -z "$DOWNLOAD_URL" ] || [ "$DOWNLOAD_URL" = "null" ]; then
             echo "::error::Failed to upload asset"
-            echo "$UPLOAD_RESPONSE"
+            echo "Upload response: $UPLOAD_RESPONSE"
             exit 1
           fi
           
-          echo "::notice::Successfully uploaded to: $DOWNLOAD_URL"
+          echo "::notice::Successfully uploaded: $DOWNLOAD_URL"
           echo "DOWNLOAD_URL=$DOWNLOAD_URL" >> $GITHUB_ENV
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
@@ -581,8 +601,13 @@ jobs:
           # Use the version we extracted earlier
           IPA_VERSION="${{ env.VERSION }}"
           
-          if [ -z "$IPA_VERSION" ] || [ "$IPA_VERSION" = "unknown" ]; then
-            echo "No version available, skipping cleanup"
+          if [ -z "$IPA_VERSION" ]; then
+            echo "No version available, trying to extract from IPA URL..."
+            IPA_VERSION=$(echo "${{ inputs.ipa_url }}" | grep -oP 'YouTube_\K[0-9]+\.[0-9]+\.[0-9]+' || echo "")
+          fi
+          
+          if [ -z "$IPA_VERSION" ]; then
+            echo "Could not extract version, skipping cleanup"
             exit 0
           fi
           

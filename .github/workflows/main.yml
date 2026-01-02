@@ -488,20 +488,26 @@ jobs:
 
           cyan -i youtube.ipa -o YTPlusYTweaks_${{ steps.ytlite_version.outputs.version }}.ipa -uwef $tweaks -n "${{ inputs.display_name }}" -b ${{ inputs.bundle_id }}
 
-      - name: Upload to GitHub Releases
-        uses: softprops/action-gh-release@v2.0.1
-        with:
-          tag_name: ytp
-          name: YouTubePlus v${{ steps.ytlite_version.outputs.version }} (${{ github.run_number }})
-          files: YTPlusYTweaks_${{ steps.ytlite_version.outputs.version }}.ipa
-          draft: false
+      - name: Upload to GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          TAG="processed-v${VERSION}"
+          FILENAME="YouTube_${VERSION}_processed.ipa"
+          
+          # Create release if it doesn't exist
+          gh release create "$TAG" --title "YouTube Processed v${VERSION}" --notes "Processed YouTube IPA v${VERSION}" || true
+          
+          # Upload the processed IPA
+          gh release upload "$TAG" "path/to/your/processed.ipa" --clobber
 
       - name: Delete decrypted IPA release
         run: |
           echo "Cleaning up decrypted IPA release..."
           
           # Extract YouTube version from IPA URL
-          IPA_VERSION=$(echo "${{ inputs.ipa_url }}" | grep -oP 'YouTube_\K[0-9]+\.[0-9]+\.[0-9]+' || echo "")
+          IPA_VERSION=$(echo "${{ inputs.ipa_url }}" | sed -n 's/.*YouTube_\([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\).*/\1/p' || echo "")
           
           if [ -z "$IPA_VERSION" ]; then
             echo "Could not extract version from IPA URL, skipping cleanup"

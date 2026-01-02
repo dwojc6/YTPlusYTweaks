@@ -494,7 +494,41 @@ jobs:
           tag_name: ytp-${{ github.run_number }}
           name: YouTubePlus v${{ steps.ytlite_version.outputs.version }} (${{ github.run_number }})
           files: YTPlusYTweaks_${{ steps.ytlite_version.outputs.version }}.ipa
-          draft: true
+          draft: false
+
+      - name: Delete decrypted IPA release
+        run: |
+          echo "Cleaning up decrypted IPA release..."
+          
+          # Extract YouTube version from IPA URL
+          IPA_VERSION=$(echo "${{ inputs.ipa_url }}" | grep -oP 'YouTube_\K[0-9]+\.[0-9]+\.[0-9]+' || echo "")
+          
+          if [ -z "$IPA_VERSION" ]; then
+            echo "Could not extract version from IPA URL, skipping cleanup"
+            exit 0
+          fi
+          
+          DECRYPTED_TAG="decrypted-v${IPA_VERSION}"
+          echo "Looking for release with tag: $DECRYPTED_TAG"
+          
+          # Check if release exists
+          RELEASE_ID=$(curl -s -H "Authorization: token ${{ github.token }}" \
+            "https://api.github.com/repos/${{ github.repository }}/releases/tags/$DECRYPTED_TAG" | \
+            jq -r '.id // empty')
+          
+          if [ -n "$RELEASE_ID" ]; then
+            echo "Found release ID: $RELEASE_ID"
+            echo "Deleting release..."
+            
+            curl -X DELETE -s -H "Authorization: token ${{ github.token }}" \
+              "https://api.github.com/repos/${{ github.repository }}/releases/$RELEASE_ID"
+            
+            echo "Deleted decrypted IPA release: $DECRYPTED_TAG"
+          else
+            echo "No decrypted IPA release found for $DECRYPTED_TAG"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
       - name: Output Release URL
         run: |

@@ -167,12 +167,14 @@ Examples:
 ```
 </details>
 
-
 ## Table of Contents
+- [Project description](#youtube-plus-ytweaks-fork)
+- [Building with GitHub Actions](#github-actions)
+- [Building locally](#local-tested-on-macos-15-sequoia)
+- [Issues](#issues-bugs--feature-requests)
 - [Screenshots](#screenshots)
-- [Main Features](#main-features)
+- [YouTube Plus](#youtube-plus-features)
 - [FAQ](#faq)
-- [How to build a YTPlusYTweaks app](#how-to-build-a-ytplusytweaks-app)
 - [Supported YouTube Version](#supported-youtube-version)
 - [Tweak Integration Details](#tweak-integration-details)
 
@@ -201,7 +203,7 @@ Examples:
   </table>
 </details>
 
-## Main Features
+## YouTube Plus Features
 <li>Download videos, audio (including audio track selection), thumbnails, posts, and profile pictures</li>
 <li>Copy video, comment, and post information</li>
 <li>Interface customization: Remove feed elements, reorder tabs, enable OLED mode, and as use Shorts-only mode</li>
@@ -216,6 +218,9 @@ Examples:
 
 **All contributors are listed in the Contributors section**
 **Used open-source libraries are listed in the Open Source Libraries section**
+
+## Issues, Bugs & Feature Requests
+Fill out an [issue form](https://github.com/fosterbarnes/YTPlusYTweaks/issues) with the applicable option selected and fill out all required info.
 
 ## FAQ
 - [🇺🇸 English FAQ](https://github.com/dayanch96/YTLite/blob/main/FAQs/FAQ_EN.md)

@@ -493,10 +493,19 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Extract version from IPA URL (e.g., YouTube_20.50.9.ipa)
-          VERSION=$(echo "${{ inputs.ipa_url }}" | grep -oP 'YouTube_\K[0-9]+\.[0-9]+\.[0-9]+' || echo "")
+          # Using sed for macOS compatibility
+          VERSION=$(echo "${{ inputs.ipa_url }}" | sed -n 's/.*YouTube_\([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\).*/\1/p')
           
           if [ -z "$VERSION" ]; then
             echo "::error::Could not extract version from IPA URL: ${{ inputs.ipa_url }}"
+            echo "Trying alternative patterns..."
+            
+            # Try without YouTube_ prefix
+            VERSION=$(echo "${{ inputs.ipa_url }}" | sed -n 's/.*[_v]\([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\).*/\1/p')
+          fi
+          
+          if [ -z "$VERSION" ]; then
+            echo "::error::Still could not extract version. IPA URL format may be unexpected."
             exit 1
           fi
           
@@ -506,14 +515,18 @@ jobs:
           FILENAME="YouTube_${VERSION}_processed.ipa"
           
           # Rename the built IPA to our desired filename
-          if [ -f "YTPlusYTweaks_${{ steps.ytlite_version.outputs.version }}.ipa" ]; then
-            mv "YTPlusYTweaks_${{ steps.ytlite_version.outputs.version }}.ipa" "$FILENAME"
-            echo "Renamed IPA to: $FILENAME"
-          else
+          BUILT_IPA=$(ls YTPlusYTweaks_*.ipa 2>/dev/null | head -n1)
+          
+          if [ -z "$BUILT_IPA" ]; then
             echo "::error::Could not find built IPA file"
-            ls -la *.ipa || true
+            echo "Contents of current directory:"
+            ls -la *.ipa 2>/dev/null || echo "No IPA files found"
             exit 1
           fi
+          
+          echo "Found built IPA: $BUILT_IPA"
+          mv "$BUILT_IPA" "$FILENAME"
+          echo "Renamed to: $FILENAME ($(du -h "$FILENAME" | cut -f1))"
           
           echo "Creating/updating release: $TAG"
           
@@ -570,7 +583,7 @@ jobs:
           fi
           
           # Upload the new asset
-          echo "Uploading $FILENAME ($(du -h "$FILENAME" | cut -f1))..."
+          echo "Uploading $FILENAME..."
           
           UPLOAD_URL="https://uploads.github.com/repos/${{ github.repository }}/releases/$RELEASE_ID/assets?name=$FILENAME"
           
@@ -603,7 +616,12 @@ jobs:
           
           if [ -z "$IPA_VERSION" ]; then
             echo "No version available, trying to extract from IPA URL..."
-            IPA_VERSION=$(echo "${{ inputs.ipa_url }}" | grep -oP 'YouTube_\K[0-9]+\.[0-9]+\.[0-9]+' || echo "")
+            IPA_VERSION=$(echo "${{ inputs.ipa_url }}" | sed -n 's/.*YouTube_\([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\).*/\1/p')
+            
+            if [ -z "$IPA_VERSION" ]; then
+              # Try alternative pattern
+              IPA_VERSION=$(echo "${{ inputs.ipa_url }}" | sed -n 's/.*[_v]\([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\).*/\1/p')
+            fi
           fi
           
           if [ -z "$IPA_VERSION" ]; then

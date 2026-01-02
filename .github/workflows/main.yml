@@ -198,8 +198,9 @@ jobs:
       - name: Download YouTube Plus
         id: download_ytp
         run: |
-          deb_url="https://github.com/dayanch96/YTLite/releases/download/v${{ steps.ytlite_version.outputs.version }}/com.dvntm.ytlite_${{ steps.ytlite_version.outputs.version }}_iphoneos-arm.deb"
+          deb_url="https://github.com/dayanch96/YTLite/releases/download/${{ steps.ytlite_version.outputs.tag }}/com.dvntm.ytlite_${{ steps.ytlite_version.outputs.version }}_iphoneos-arm.deb"
           echo "Downloading YouTube Plus version: ${{ steps.ytlite_version.outputs.version }}"
+          echo "Download URL: $deb_url"
           wget "$deb_url" --no-verbose -O ${{ github.workspace }}/ytplus.deb
 
       - name: Clone Open in YouTube (Safari extension)
